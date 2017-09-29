@@ -42,17 +42,17 @@ for idx, anno in enumerate(annos):
     try:
         # Read image.
         img = io.imread(image_dir + anno['image_id'] + '.jpg')
-        height, width, channel = img.shape
+        height, width, channel = img.shape  ##Not unified scale, channel=3
 
         # For every human annotations.
-        for key in anno['keypoint_annotations'].keys():
+        for key in anno['keypoint_annotations'].keys(): ##key=[u'human1']
 
             # Read keypoint positions and the bounding box
             keypoints = np.reshape(anno['keypoint_annotations'][key], (14, 3))
             bbox = anno['human_annotations'][key]
             mask = np.zeros((height, width), 'uint8')
 
-            bbox_area = (bbox[3]-bbox[1]) * (bbox[2]-bbox[0])
+            bbox_area = (bbox[3]-bbox[1]) * (bbox[2]-bbox[0]) ##Calculate bbox_area
             if bbox_area == 0:
                 continue
 
@@ -70,8 +70,8 @@ for idx, anno in enumerate(annos):
             for i in range(14):
                 if keypoints[i, 2] == 1:
                     # Center and radius of the keypoint.
-                    c = keypoints[i, :2]
-                    r = int(keypoints_std[i] * args.ratio * scale) + 1
+                    c = keypoints[i, :2] ## c=[keypoint_x, keypoint_y]
+                    r = int(keypoints_std[i] * args.ratio * scale) + 1 #
                     # Boundary of each keypoint area.
                     left = max((0, c[0] - r))
                     right = min((width - 1, c[0] + r))
@@ -79,8 +79,8 @@ for idx, anno in enumerate(annos):
                     down = min((height - 1, c[1] + r))
                     # Generate mask of each keypoint area.
                     meshgrid = np.meshgrid(range(left, right), range(up, down))
-                    inds = ((meshgrid[0] - c[0]) ** 2 + (meshgrid[1] - c[1]) ** 2) <= r * r
-                    mask[up:down, left:right][inds] = i + 1
+                    inds = ((meshgrid[0] - c[0]) ** 2 + (meshgrid[1] - c[1]) ** 2) <= r * r ##???
+                    mask[up:down, left:right][inds] = i + 1  ##???
 
             # Crop the original image and the ground truth mask.
             img_crop = img[crop_up:crop_down, crop_left:crop_right, :]
